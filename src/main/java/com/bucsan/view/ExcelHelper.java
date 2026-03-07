@@ -4,12 +4,12 @@ import com.bucsan.analysis.AnalysisResult;
 import com.bucsan.utils.FileHelper;
 import com.bucsan.analysis.GovDocument;
 import com.bucsan.view.model.CellInfo;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.net.URI;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,28 +26,28 @@ public class ExcelHelper {
         List<String> errors = new ArrayList<>();
 
         generateTotalSheet(workbook, results);
-        generateMonthSheets(results, workbook, errors);
+        generateMonthSheets(workbook, results, errors);
         generateErrorSheet(workbook, errors);
 
         return workbook;
     }
 
-    private void generateMonthSheets(List<AnalysisResult> results, Workbook workbook, List<String> errors) {
+    private void generateMonthSheets(Workbook workbook, List<AnalysisResult> results, List<String> errors) {
         for (AnalysisResult result : results) {
             Sheet sheet = workbook.createSheet(result.getFolderName());
-            printResultOnSheet(result, sheet);
+            printResultOnSheet(workbook, result, sheet);
             errors.addAll(result.getErrors());
         }
     }
 
-    private void printResultOnSheet(AnalysisResult result, Sheet sheet) {
+    private void printResultOnSheet(Workbook workbook, AnalysisResult result, Sheet sheet) {
         Integer row = 0;
         row = createTotalColumns(result, sheet, row);
         row = createBlankRow(sheet, row);
         int totalColumns = createDocumentHeader(sheet, result.getSearchExpressions(), row++);
         for(int i = 0; i < result.getFiles().size(); i++) {
             GovDocument document = result.getFiles().get(i);
-            row = createDocumentResultRow(document, result.getSearchExpressions(), sheet, row);
+            row = createDocumentResultRow(workbook, document, result.getSearchExpressions(), sheet, row);
         }
         for (int i = 0; i < totalColumns; i++) {
             sheet.autoSizeColumn(i);
@@ -58,7 +58,7 @@ public class ExcelHelper {
         Sheet sheet = workbook.createSheet("Totais");
         AnalysisResult totalResult = AnalysisResult.totalizeResults(results);
         createHTMLFiles(totalResult);
-        printResultOnSheet(totalResult, sheet);
+        printResultOnSheet(workbook, totalResult, sheet);
     }
 
     private void createHTMLFiles(AnalysisResult result) {
@@ -138,17 +138,37 @@ public class ExcelHelper {
         return objects.size();
     }
 
-    private Integer createDocumentResultRow(GovDocument document, List<String> expressions, Sheet sheet, Integer rowNumber) {
+    private Integer createDocumentResultRow(Workbook workbook, GovDocument document, List<String> expressions, Sheet sheet, Integer rowNumber) {
         Row row = sheet.createRow(rowNumber++);
 
         List<CellInfo> cellInfos = document.getCellInfos(expressions);
 
         for(int i = 0; i < cellInfos.size(); i++) {
+            CellInfo cellInfo = cellInfos.get(i);
             Cell cell = row.createCell(i);
-            cell.setCellValue(cellInfos.get(i).getValue());
+            cell.setCellValue(cellInfo.getValue());
+            if(cellInfo.isFileLink()) {
+                createLocalLink(workbook, cellInfo, cell);
+            }
         }
 
         return rowNumber;
+    }
+
+    private static void createLocalLink(Workbook workbook, CellInfo cellinfo, Cell cell) {
+        CreationHelper helper = workbook.getCreationHelper();
+        Hyperlink link = helper.createHyperlink(HyperlinkType.FILE);
+
+        URI uri = Path.of(cellinfo.getValue()).toUri();
+        link.setAddress(uri.toString());
+        cell.setHyperlink(link);
+
+        CellStyle style = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setUnderline(Font.U_SINGLE);
+        font.setColor(IndexedColors.BLUE.getIndex());
+        style.setFont(font);
+        cell.setCellStyle(style);
     }
 
 }

@@ -113,7 +113,7 @@ public class GovDocument {
         cellInfos.add(new CellInfo(getPubDate()));
         cellInfos.add(new CellInfo(getArtCategory()));
         cellInfos.add(new CellInfo(getEmenta()));
-        cellInfos.add(new CellInfo(getArquivo()));
+        cellInfos.add(new CellInfo(getArquivo(), true));
         cellInfos.add(new CellInfo(getArquivoHtml(), true));
 
         for(String expression : expressions) {
