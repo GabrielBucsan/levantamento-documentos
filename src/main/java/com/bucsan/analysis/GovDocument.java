@@ -1,6 +1,10 @@
 package com.bucsan.analysis;
 
+import com.bucsan.view.model.CellInfo;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GovDocument {
@@ -98,5 +102,24 @@ public class GovDocument {
 
     public boolean hasNoEmenta() {
         return ementa == null || ementa.isEmpty();
+    }
+
+    public List<CellInfo>  getCellInfos(List<String> expressions) {
+        List<CellInfo> cellInfos = new ArrayList<>();
+
+        cellInfos.add(new CellInfo(getName()));
+        cellInfos.add(new CellInfo(getIdentifica()));
+        cellInfos.add(new CellInfo(getNumberPage()));
+        cellInfos.add(new CellInfo(getPubDate()));
+        cellInfos.add(new CellInfo(getArtCategory()));
+        cellInfos.add(new CellInfo(getEmenta()));
+        cellInfos.add(new CellInfo(getArquivo()));
+        cellInfos.add(new CellInfo(getArquivoHtml(), true));
+
+        for(String expression : expressions) {
+            cellInfos.add(new CellInfo(String.valueOf(ocorrenciasExpressoes.get(expression))));
+        }
+
+        return  cellInfos;
     }
 }

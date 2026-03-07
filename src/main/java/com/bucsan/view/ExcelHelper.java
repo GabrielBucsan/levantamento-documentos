@@ -3,6 +3,7 @@ package com.bucsan.view;
 import com.bucsan.analysis.AnalysisResult;
 import com.bucsan.utils.FileHelper;
 import com.bucsan.analysis.GovDocument;
+import com.bucsan.view.model.CellInfo;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -140,23 +141,11 @@ public class ExcelHelper {
     private Integer createDocumentResultRow(GovDocument document, List<String> expressions, Sheet sheet, Integer rowNumber) {
         Row row = sheet.createRow(rowNumber++);
 
-        List<Object> objects = new ArrayList<>();
-        objects.add(document.getName());
-        objects.add(document.getIdentifica());
-        objects.add(document.getNumberPage());
-        objects.add(document.getPubDate());
-        objects.add(document.getArtCategory());
-        objects.add(document.getEmenta());
-        objects.add(document.getArquivo());
-        objects.add(document.getArquivoHtml());
+        List<CellInfo> cellInfos = document.getCellInfos(expressions);
 
-        for(String expression : expressions) {
-            objects.add(document.getExpressionCount(expression));
-        }
-
-        for(int i = 0; i < objects.size(); i++) {
+        for(int i = 0; i < cellInfos.size(); i++) {
             Cell cell = row.createCell(i);
-            cell.setCellValue(objects.get(i).toString());
+            cell.setCellValue(cellInfos.get(i).getValue());
         }
 
         return rowNumber;
