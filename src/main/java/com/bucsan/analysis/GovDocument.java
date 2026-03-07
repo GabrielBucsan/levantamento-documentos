@@ -13,6 +13,7 @@ public class GovDocument {
     String ementa;
     String texto;
     String arquivo;
+    String arquivoHtml;
     Map<String, Integer> ocorrenciasExpressoes = new HashMap<>();
 
     public void setNumberPage(String numberPage) {
@@ -45,6 +46,10 @@ public class GovDocument {
 
     public void setArquivo(String arquivo) {
         this.arquivo = arquivo;
+    }
+
+    public void setArquivoHtml(String arquivoHtml) {
+        this.arquivoHtml = arquivoHtml;
     }
 
     public void setExpressionCount(String expression, Integer expressionCount) {
@@ -85,6 +90,10 @@ public class GovDocument {
 
     public String getArquivo() {
         return arquivo;
+    }
+
+    public String getArquivoHtml() {
+        return arquivoHtml;
     }
 
     public boolean hasNoEmenta() {

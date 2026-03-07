@@ -31,8 +31,6 @@ public class ExcelHelper {
         return workbook;
     }
 
-
-
     private void generateMonthSheets(List<AnalysisResult> results, Workbook workbook, List<String> errors) {
         for (AnalysisResult result : results) {
             Sheet sheet = workbook.createSheet(result.getFolderName());
@@ -58,15 +56,15 @@ public class ExcelHelper {
     private void generateTotalSheet(Workbook workbook, List<AnalysisResult> results) {
         Sheet sheet = workbook.createSheet("Totais");
         AnalysisResult totalResult = AnalysisResult.totalizeResults(results);
-        printResultOnSheet(totalResult, sheet);
         createHTMLFiles(totalResult);
+        printResultOnSheet(totalResult, sheet);
     }
 
     private void createHTMLFiles(AnalysisResult result) {
         FileHelper helper = new FileHelper();
         helper.clearHTMLFiles(result.getFolderName());
         for(GovDocument document : result.getFiles()) {
-            helper.createViewFile(result.getFolderName(), document.getIdentifica(), document.getTexto());
+            document.setArquivoHtml(helper.createViewFile(result.getFolderName(), document.getIdentifica(), document.getTexto()));
         }
     }
 
@@ -126,6 +124,7 @@ public class ExcelHelper {
         objects.add("Órgão responsável pela publicação");
         objects.add("Ementa");
         objects.add("Arquivo");
+        objects.add("Arquivo de visualização");
         objects.addAll(expressions);
 
         for(int i = 0; i < objects.size(); i++) {
@@ -149,6 +148,7 @@ public class ExcelHelper {
         objects.add(document.getArtCategory());
         objects.add(document.getEmenta());
         objects.add(document.getArquivo());
+        objects.add(document.getArquivoHtml());
 
         for(String expression : expressions) {
             objects.add(document.getExpressionCount(expression));

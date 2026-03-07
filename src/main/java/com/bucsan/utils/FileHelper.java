@@ -185,7 +185,7 @@ public class FileHelper {
         return "";
     }
 
-    public void createViewFile(String directory, String fileName, String text) {
+    public String createViewFile(String directory, String fileName, String text) {
 
         String dir = viewFileDirectory + "/" + directory.substring(directory.length() - 4) + "/";
 
@@ -196,11 +196,13 @@ public class FileHelper {
                 System.out.println("Diretório criado: " + dir);
             } catch (IOException e) {
                 System.err.println("Erro ao criar diretório: " + e.getMessage());
-                return;
+                return null;
             }
         }
 
-        try (FileWriter writer = new FileWriter(dir + fileName.replace("*", "").replace(" ", "_") + viewFileExtension)) {
+        String completeFileName = dir + fileName.replace("*", "").replace(" ", "_") + viewFileExtension;
+
+        try (FileWriter writer = new FileWriter(completeFileName)) {
             writer.write(String.format("<!DOCTYPE html>\n" +
                     "<html lang=\"pt-BR\">\n" +
                     "<head>\n" +
@@ -214,6 +216,8 @@ public class FileHelper {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return completeFileName;
     }
 
 }
