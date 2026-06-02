@@ -7,7 +7,7 @@ O programa foi desenhado para levantar documentos do [Diário Oficial da União 
 
 > A rotina de programação desenvolvida pode ser utilizada para pesquisas que, utilizando o DOU como fonte de informações, tenham distintos objetos e objetivos, pois a seleção dos arquivos pertinentes acontece por meio de termos de busca que podem ser livremente modificados.
 
-Para utilizar o programa é necessário que você faça o download dos arquivos do DOUem seu computador. Estes arquivos são disponibilizados em três seções, separados por ano e mês. Na seção 1, encontram-se publicados atos normativos de interesse geral (leis, decretos, resoluções, instruções normativas, portarias e outros). Na seção 02, atos relativos aos servidores públicos e, na seção 3, extratos de instrumentos contratuais, intimação, notificação e concursos públicos, comunicados, avisos de licitação, dentre outros atos da administração pública decorrentes de disposição legal.
+Para utilizar o programa é necessário que você faça o download dos arquivos do DOU em seu computador. Estes arquivos são disponibilizados em três seções, separados por ano e mês. Na seção 1, encontram-se publicados atos normativos de interesse geral (leis, decretos, resoluções, instruções normativas, portarias e outros). Na seção 02, atos relativos aos servidores públicos e, na seção 3, extratos de instrumentos contratuais, intimação, notificação e concursos públicos, comunicados, avisos de licitação, dentre outros atos da administração pública decorrentes de disposição legal.
 
 > Os arquivos são obtidos no formato XML – sigla para Extensible Markup Language, que significa Linguagem de Marcação Extensível. O XML é um formato de arquivo que permite a definição e armazenamento de dados de forma organizada, utilizando uma codificação de documentos que garante que o arquivo final seja legível tanto para os usuários quanto para os computadores.
 
@@ -27,7 +27,7 @@ Vá até a pasta Downloads, clique com o botão direito no arquivo `.zip` baixad
 ## Organização dos arquivos em pastas
 Para que o programa consiga ler os arquivos baixados, é necessário organizá-los na seguinte estrutura:
 
-- uma pasta geral, que irá conter todos os arquivos XML baixados. Esta será a pasta utilizada pelo programa, no campo **Diretório contendo arquivos para pesquisa**;
+- uma pasta geral, que irá conter todos os arquivos XML baixados. Esta será a pasta utilizada pelo programa no campo **Diretório contendo arquivos para pesquisa**;
 - dentro da pasta geral, deve-se ter uma pasta por ano;
 - dentro da pasta de cada ano, deve-se ter uma pasta por mês.
 
@@ -56,7 +56,7 @@ Após execução, abrirá a tela abaixo:
 
 Para executar a busca:
 - preencha as palavras-chave que serão utilizadas para pesquisa no corpo dos arquivos; 
-- preencha o(s) órgão(s) responsável(s) ou deixe em branco para buscar em todos os órgãos do governo executivo federal;
+- preencha o(s) órgão(s) responsável(s) ou deixe em branco para buscar em todos os órgãos do poder executivo federal;
 - informe a pasta geral criada anteriormente, clicando em **Procurar**;
 - clique em **Executar**.
 
