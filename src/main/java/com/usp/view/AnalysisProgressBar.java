@@ -1,4 +1,4 @@
-package com.bucsan.view;
+package com.usp.view;
 
 import javax.swing.*;
 

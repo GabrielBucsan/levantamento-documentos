@@ -4,9 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
+    <groupId>org.usp</groupId>
     <artifactId>analise-documentos</artifactId>
-    <version>1.2</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
 
     <build>
@@ -16,8 +16,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
 
@@ -34,7 +34,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.bucsan.Main</mainClass>
+                                    <mainClass>com.usp.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>

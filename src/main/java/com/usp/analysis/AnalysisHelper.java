@@ -1,7 +1,7 @@
-package com.bucsan.analysis;
+package com.usp.analysis;
 
-import com.bucsan.utils.FileHelper;
-import com.bucsan.view.AnalysisProgressBar;
+import com.usp.utils.FileHelper;
+import com.usp.view.AnalysisProgressBar;
 
 import java.io.IOException;
 import java.nio.file.Files;

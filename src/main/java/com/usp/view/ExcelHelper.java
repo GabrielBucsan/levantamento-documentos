@@ -1,15 +1,15 @@
-package com.bucsan.view;
+package com.usp.view;
 
-import com.bucsan.analysis.AnalysisResult;
-import com.bucsan.utils.FileHelper;
-import com.bucsan.analysis.GovDocument;
-import com.bucsan.view.model.CellInfo;
+import com.usp.analysis.AnalysisResult;
+import com.usp.analysis.GovDocument;
+import com.usp.utils.FileHelper;
+import com.usp.view.model.CellInfo;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.net.URI;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -159,7 +159,7 @@ public class ExcelHelper {
         CreationHelper helper = workbook.getCreationHelper();
         Hyperlink link = helper.createHyperlink(HyperlinkType.FILE);
 
-        URI uri = Path.of(cellinfo.getValue()).toUri();
+        URI uri = Paths.get(cellinfo.getValue()).toUri();
         link.setAddress(uri.toString());
         cell.setHyperlink(link);
 

@@ -1,9 +1,9 @@
-package com.bucsan.view;
+package com.usp.view;
 
-import com.bucsan.analysis.AnalysisHelper;
-import com.bucsan.analysis.AnalysisResult;
-import com.bucsan.utils.FileHelper;
-import com.bucsan.analysis.SearchExpressions;
+import com.usp.analysis.AnalysisHelper;
+import com.usp.analysis.AnalysisResult;
+import com.usp.utils.FileHelper;
+import com.usp.analysis.SearchExpressions;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;

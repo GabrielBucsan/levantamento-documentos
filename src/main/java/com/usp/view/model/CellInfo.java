@@ -1,4 +1,4 @@
-package com.bucsan.view.model;
+package com.usp.view.model;
 
 public class CellInfo {
 

@@ -1,6 +1,6 @@
-package com.bucsan.analysis;
+package com.usp.analysis;
 
-import com.bucsan.view.model.CellInfo;
+import com.usp.view.model.CellInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,4 +1,4 @@
-package com.bucsan.analysis;
+package com.usp.analysis;
 
 import java.util.ArrayList;
 import java.util.Arrays;

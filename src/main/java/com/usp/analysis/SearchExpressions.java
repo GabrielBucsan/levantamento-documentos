@@ -1,4 +1,4 @@
-package com.bucsan.analysis;
+package com.usp.analysis;
 
 public class SearchExpressions {
 

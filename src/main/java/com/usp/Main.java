@@ -1,6 +1,6 @@
-package com.bucsan;
+package com.usp;
 
-import com.bucsan.view.ApplicationGUI;
+import com.usp.view.ApplicationGUI;
 
 public class Main {
     public static void main(String[] args) {

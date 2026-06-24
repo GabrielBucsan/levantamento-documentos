@@ -1,7 +1,7 @@
-package com.bucsan.utils;
+package com.usp.utils;
 
-import com.bucsan.analysis.GovDocument;
-import com.bucsan.analysis.SearchExpressions;
+import com.usp.analysis.GovDocument;
+import com.usp.analysis.SearchExpressions;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
