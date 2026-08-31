@@ -15,6 +15,12 @@ import java.util.stream.Stream;
 
 public class AnalysisHelper {
 
+    // Letras acentuadas/especiais do português que o usuário antes precisava digitar
+    // manualmente como "." (ex.: "atenção primária" -> "aten..o prim.ria") para a busca
+    // por regex funcionar independente de acentuação/codificação do texto original.
+    private static final Pattern SPECIAL_CHARS_PATTERN =
+            Pattern.compile("[áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ]");
+
     public List<AnalysisResult> runAnalysis(String directoryPath, SearchExpressions expressions) {
         AnalysisHelper analysisHelper = new AnalysisHelper();
         List<AnalysisResult> results = new ArrayList<>();
@@ -81,12 +87,15 @@ public class AnalysisHelper {
     private boolean hasExpressionInString(String texto, GovDocument document, String[] expressoesChave) {
         boolean hasAnyExpression = false;
         for(String expressao : expressoesChave) {
-            Pattern pattern = Pattern.compile(expressao.trim(), Pattern.CASE_INSENSITIVE);
+            String expressaoRegex = prepararExpressaoParaRegex(expressao.trim());
+            Pattern pattern = Pattern.compile(expressaoRegex, Pattern.CASE_INSENSITIVE);
             Matcher matcher = pattern.matcher(texto);
             int expressionCount = 0;
             while(matcher.find()) {
                 expressionCount++;
             }
+            // A chave continua sendo a expressão original digitada pelo usuário (sem a
+            // substituição por ".") - é ela que é salva em searchData e exibida na planilha.
             document.setExpressionCount(expressao, expressionCount);
             if(expressionCount > 0) {
                 hasAnyExpression = true;
@@ -94,6 +103,15 @@ public class AnalysisHelper {
         }
 
         return hasAnyExpression;
+    }
+
+    /**
+     * Substitui letras acentuadas/especiais por "." só para fins de compilação do regex de
+     * busca - a expressão original (digitada pelo usuário) não é alterada em nenhum outro
+     * lugar (searchData.sav, planilhas de resultado, etc.).
+     */
+    private String prepararExpressaoParaRegex(String expressao) {
+        return SPECIAL_CHARS_PATTERN.matcher(expressao).replaceAll(".");
     }
 
 }
