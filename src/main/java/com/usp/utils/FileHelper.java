@@ -14,8 +14,16 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class FileHelper {
+
+    // Caracteres reservados em nomes de arquivo no Windows (: * ? " < > | / \) mais
+    // caracteres de controle, que quebram File/FileWriter mesmo em outros SOs.
+    private static final Pattern INVALID_FILENAME_CHARS = Pattern.compile("[\\\\/:*?\"<>|\\x00-\\x1F]");
 
     String errorExtension = ".err";
     String saveFileName = "searchData.sav";
@@ -157,6 +165,26 @@ public class FileHelper {
         return count[0];
     }
 
+    public List<String> listSubdirectoryNames(String directoryPath) {
+        List<String> names = new ArrayList<>();
+        Path dir = Paths.get(directoryPath);
+
+        if (!Files.isDirectory(dir)) {
+            return names;
+        }
+
+        try (Stream<Path> paths = Files.list(dir)) {
+            paths.filter(Files::isDirectory)
+                    .map(path -> path.getFileName().toString())
+                    .sorted()
+                    .forEach(names::add);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return names;
+    }
+
     public String loadDirectoryPath() {
         return loadSavedConfig(2);
     }
@@ -200,7 +228,7 @@ public class FileHelper {
             }
         }
 
-        String completeFileName = dir + fileName.replace("*", "").replace(" ", "_") + viewFileExtension;
+        String completeFileName = dir + sanitizeFileName(fileName) + viewFileExtension;
 
         try (FileWriter writer = new FileWriter(completeFileName)) {
             writer.write(String.format("<!DOCTYPE html>\n" +
@@ -218,6 +246,22 @@ public class FileHelper {
         }
 
         return completeFileName;
+    }
+
+    private String sanitizeFileName(String fileName) {
+        if (fileName == null) {
+            return "";
+        }
+
+        String sanitized = INVALID_FILENAME_CHARS.matcher(fileName).replaceAll("_");
+        sanitized = sanitized.replace(" ", "_").trim();
+
+        // Windows não aceita nome de arquivo terminando em ponto ou espaço.
+        while (sanitized.endsWith(".") || sanitized.endsWith("_")) {
+            sanitized = sanitized.substring(0, sanitized.length() - 1);
+        }
+
+        return sanitized.isEmpty() ? "documento" : sanitized;
     }
 
 }
