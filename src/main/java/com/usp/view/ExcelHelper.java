@@ -88,7 +88,7 @@ public class ExcelHelper {
 
         Row row2 = sheet.createRow(line++);
         Cell cell3 = row2.createCell(0);
-        cell3.setCellValue("Arquivos contendo pelo menos uma das expressões:");
+        cell3.setCellValue("Arquivos contendo pelo menos um dos termos:");
         Cell cell4 = row2.createCell(1);
         cell4.setCellValue(result.getFilesContainingKeywords());
 
