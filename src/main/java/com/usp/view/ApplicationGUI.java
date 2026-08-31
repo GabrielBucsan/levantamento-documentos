@@ -8,17 +8,24 @@ import com.usp.analysis.SearchExpressions;
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class ApplicationGUI {
+
+    private enum SelectionState { NONE, PARTIAL, ALL }
 
     AnalysisHelper analysisHelper = new AnalysisHelper();
     FileHelper fileHelper = new FileHelper();
     JPanel yearsPanel = new JPanel();
     List<JCheckBox> yearCheckboxes = new ArrayList<>();
+    JCheckBox selectAllYearsCheckBox;
+    SelectionState selectAllYearsState = SelectionState.NONE;
+    JButton browseButton;
 
     public void startGui() {
         JFrame frame = createMainFrame();
@@ -36,9 +43,26 @@ public class ApplicationGUI {
 
     private void createYearsSelectionField(JFrame frame, GridBagConstraints gbc) {
         JLabel yearsLabel = new JLabel("Anos a pesquisar:");
+
+        // Texto inicial é o mais longo dos dois ("Desmarcar todos") só para medir o
+        // tamanho preferido; fixamos esse tamanho abaixo para a troca de texto não
+        // deslocar a caixinha (ela fica ancorada em BorderLayout.EAST).
+        selectAllYearsCheckBox = new JCheckBox("Desmarcar todos");
+        TriStateCheckBoxIcon triStateIcon = new TriStateCheckBoxIcon(() -> selectAllYearsState);
+        selectAllYearsCheckBox.setIcon(triStateIcon);
+        selectAllYearsCheckBox.setSelectedIcon(triStateIcon);
+        selectAllYearsCheckBox.addActionListener(e -> toggleAllYears());
+        Dimension selectAllFixedSize = selectAllYearsCheckBox.getPreferredSize();
+        selectAllYearsCheckBox.setPreferredSize(selectAllFixedSize);
+        selectAllYearsCheckBox.setMinimumSize(selectAllFixedSize);
+
+        JPanel yearsHeaderRow = new JPanel(new BorderLayout());
+        yearsHeaderRow.add(yearsLabel, BorderLayout.WEST);
+        yearsHeaderRow.add(selectAllYearsCheckBox, BorderLayout.EAST);
+
         gbc.gridx = 0;
         gbc.gridy = 6;
-        frame.add(yearsLabel, gbc);
+        frame.add(yearsHeaderRow, gbc);
 
         yearsPanel.setLayout(new GridLayout(0, 1));
 
@@ -73,6 +97,7 @@ public class ApplicationGUI {
                 JCheckBox yearCheckBox = new JCheckBox(years.get(i), true);
                 yearCheckBox.setOpaque(true);
                 yearCheckBox.setBackground(i % 2 == 0 ? YEAR_ROW_COLOR_EVEN : YEAR_ROW_COLOR_ODD);
+                yearCheckBox.addActionListener(e -> updateSelectAllYearsCheckBox());
                 yearCheckboxes.add(yearCheckBox);
                 yearsPanel.add(yearCheckBox);
             }
@@ -80,6 +105,48 @@ public class ApplicationGUI {
 
         yearsPanel.revalidate();
         yearsPanel.repaint();
+        updateSelectAllYearsCheckBox();
+    }
+
+    private void toggleAllYears() {
+        boolean anySelected = yearCheckboxes.stream().anyMatch(JCheckBox::isSelected);
+        for (JCheckBox yearCheckBox : yearCheckboxes) {
+            yearCheckBox.setSelected(!anySelected);
+        }
+        updateSelectAllYearsCheckBox();
+    }
+
+    private void updateSelectAllYearsCheckBox() {
+        long selectedCount = yearCheckboxes.stream().filter(JCheckBox::isSelected).count();
+
+        if (yearCheckboxes.isEmpty() || selectedCount == 0) {
+            selectAllYearsState = SelectionState.NONE;
+        } else if (selectedCount == yearCheckboxes.size()) {
+            selectAllYearsState = SelectionState.ALL;
+        } else {
+            selectAllYearsState = SelectionState.PARTIAL;
+        }
+
+        selectAllYearsCheckBox.setText(selectAllYearsState == SelectionState.NONE ? "Marcar todos" : "Desmarcar todos");
+        selectAllYearsCheckBox.setSelected(selectAllYearsState == SelectionState.ALL);
+        selectAllYearsCheckBox.setEnabled(!yearCheckboxes.isEmpty());
+        selectAllYearsCheckBox.repaint();
+    }
+
+    private void setControlsEnabledDuringAnalysis(boolean enabled, JTextArea searchField, JTextArea responsibleSearchField) {
+        browseButton.setEnabled(enabled);
+        searchField.setEnabled(enabled);
+        responsibleSearchField.setEnabled(enabled);
+        for (JCheckBox yearCheckBox : yearCheckboxes) {
+            yearCheckBox.setEnabled(enabled);
+        }
+
+        if (enabled) {
+            // Reaplica o estado real (inclusive se a lista ficou vazia nesse meio tempo).
+            updateSelectAllYearsCheckBox();
+        } else {
+            selectAllYearsCheckBox.setEnabled(false);
+        }
     }
 
     private List<Path> getSelectedYearPaths(String directoryPath) {
@@ -114,6 +181,7 @@ public class ApplicationGUI {
 
                 executeButton.setEnabled(false);
                 executeButton.setText("Análise em andamento");
+                setControlsEnabledDuringAnalysis(false, searchField, responsibleSearchField);
 
                 AnalysisProgressBar bar = getAnalysisProgressBar(gbc, frame, selectedYearPaths);
 
@@ -124,8 +192,11 @@ public class ApplicationGUI {
                         SwingUtilities.invokeLater(() -> {
                             executeButton.setEnabled(true);
                             executeButton.setText("Executar");
-                            JOptionPane.showMessageDialog(frame, "Análise concluída!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+                            setControlsEnabledDuringAnalysis(true, searchField, responsibleSearchField);
                             frame.remove(bar.getProgressBar());
+                            frame.revalidate();
+                            frame.repaint();
+                            JOptionPane.showMessageDialog(frame, "Análise concluída!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                         });
                     }
                 }).start();
@@ -197,10 +268,24 @@ public class ApplicationGUI {
         JTextField directoryField = new JTextField(20);
         directoryField.setEditable(false);
 
-        JButton browseButton = new JButton("Procurar");
+        browseButton = new JButton("Procurar");
         browseButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory());
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+            // Se já houver uma pasta selecionada, abre o popup posicionado nela (na
+            // pasta "irmã", com a atual pré-selecionada), facilitando trocar para
+            // outra pasta próxima em vez de sempre começar do diretório padrão.
+            String currentPath = directoryField.getText();
+            if (currentPath != null && !currentPath.isEmpty()) {
+                File currentDir = new File(currentPath);
+                if (currentDir.isDirectory()) {
+                    File parentDir = currentDir.getParentFile();
+                    fileChooser.setCurrentDirectory(parentDir != null ? parentDir : currentDir);
+                    fileChooser.setSelectedFile(currentDir);
+                }
+            }
+
             int returnValue = fileChooser.showOpenDialog(null);
             if (returnValue == JFileChooser.APPROVE_OPTION) {
                 directoryField.setText(fileChooser.getSelectedFile().getAbsolutePath());
@@ -243,6 +328,55 @@ public class ApplicationGUI {
         }
 
         return searchField;
+    }
+
+    /**
+     * Ícone de checkbox com três visuais: vazio (nenhum item selecionado), traço
+     * horizontal (seleção parcial) e marcado (todos selecionados). O estado exibido
+     * vem de fora (via Supplier), não do próprio modelo selected/unselected do botão.
+     */
+    private static class TriStateCheckBoxIcon implements Icon {
+        private static final int SIZE = 14;
+        private static final Color ACCENT_COLOR = new Color(51, 122, 183);
+
+        private final Supplier<SelectionState> stateSupplier;
+
+        TriStateCheckBoxIcon(Supplier<SelectionState> stateSupplier) {
+            this.stateSupplier = stateSupplier;
+        }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            g2.setColor(Color.WHITE);
+            g2.fillRect(x, y, SIZE, SIZE);
+            g2.setColor(new Color(120, 120, 120));
+            g2.drawRect(x, y, SIZE - 1, SIZE - 1);
+
+            SelectionState state = stateSupplier.get();
+            g2.setColor(ACCENT_COLOR);
+            if (state == SelectionState.ALL) {
+                g2.setStroke(new BasicStroke(2f));
+                g2.drawLine(x + 3, y + 7, x + 6, y + 10);
+                g2.drawLine(x + 6, y + 10, x + 11, y + 3);
+            } else if (state == SelectionState.PARTIAL) {
+                g2.fillRect(x + 3, y + (SIZE / 2) - 1, SIZE - 6, 2);
+            }
+
+            g2.dispose();
+        }
+
+        @Override
+        public int getIconWidth() {
+            return SIZE;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return SIZE;
+        }
     }
 
 }
